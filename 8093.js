@@ -63,14 +63,12 @@ function hide(){
 	var x = document.getElementById("x");
 	var y = document.getElementById("y");
 	var z = document.getElementById("z");
-	console.log(z.value)
 	if((x===null) || (x.value == ""))x = undefined;
 	else x = parseInt(x.value);
 	if((y===null) || (y.value == ""))y = undefined;
 	else y = parseInt(y.value);
 	if((z===null) || (z.value == ""))z = undefined;
 	else z = eval("("+z.value+")");
-	console.log(x,y,z)
 	img.src = hideData(data,img,x,y,z);
 }
 function seek(){
