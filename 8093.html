@@ -2,9 +2,50 @@
 <head>
 <title>8093:</title>
 <script src="8093.js"></script>
+<script>
+
+window.onload = function(){
+	var img = document.getElementById("targetImage");
+	window.dragenter = function(ev) {
+  		ev.stopPropagation();
+		ev.preventDefault();
+	}
+	window.dragover = function(ev) {
+		ev.stopPropagation();
+		ev.preventDefault();
+	}
+	img.drop = function(ev) {
+		ev.stopPropagation();
+		ev.preventDefault();
+		var files = ev.dataTransfer.files;
+		if(files.length>1)return alert("Just one file, thankyouverymuch!")
+		else if(files[0].type != "image/png") return alert("Use .png files, thankyouverymuch!")
+		else return useImage(files[0]);
+	}
+	img.addEventListener("dragenter", dragenter, false);
+	img.addEventListener("dragover", dragover, false);
+	img.addEventListener("drop", img.drop, false);
+}
+
+function useImage(file){
+	var img = document.getElementById("targetImage");
+	img.file = file;
+	var reader = new FileReader();
+	reader.onload = function(ev) {
+		console.log(ev);
+		img.src = ev.target.result;
+	}
+	reader.onerror = function(ev){
+		return Error("FileError. Dropped file could not be read.");
+	}
+	reader.readAsDataURL(file);
+}
+
+
+</script>
 <style>
 *{margin:0;padding:0;border-radius:4px;}
-body{background-color:#fcfcfc;font-size:14px;font-family:helvetica,"Helvetica Neue",arial,sans-serif;line-height:1.5;background-image:url("orstafootert.png");background-repeat:no-repeat;background-position:bottom;padding-bottom:180px;}
+body{background-color:#fcfcfc;font-size:14px;font-family:helvetica,"Helvetica Neue",arial,sans-serif;line-height:1.5;background-image:url("footer.png");background-repeat:no-repeat;background-position:bottom;padding-bottom:180px;}
 
 div#content {width:600px;margin:0 auto;}
 div#upper	{padding:20px 0 0 0;text-align:center;}
@@ -28,7 +69,8 @@ p		{padding:5px 0 5px 0;}
 hr		{margin:20px 0;}
 textarea{width:450px;height:100px;padding:5px;border-color:#ccc;}
 
-img#x{width:100px;height:100px;margin: 0 20px;border-color:#ccc;}
+img#targetImage{width:100px;height:100px;margin: 0 20px;float:right;border: solid 1px #ccc;background-color:#FFF;}
+img#targetImage:hover{border: solid 3px #aeaefe;background-color:#fafaFf;position:relative;top:-2px;right:-2px;}
 
 </style>
 </head>
@@ -41,10 +83,10 @@ img#x{width:100px;height:100px;margin: 0 20px;border-color:#ccc;}
 		<hr/>
 		<div id="middle">
 		<h3 id="">Okay, to hide some data! <a href="#about" class="button skinny"><sup>[?]</sup></a></h3>
-		<textarea placeholder="What is five times nine?"></textarea>
-		<img src="" id="x"></img>
+		<textarea id="data" placeholder="What is five times nine?"></textarea>
+		<img src="" id="targetImage" title="Drag the desired image here!"></img>
 		<br/>
-		<b class="button">Commence the hiding sequence!</b>
+		<b class="button" onclick="hide()">Hide</b>/<b class="button" onclick="seek()">Seek</b>
 		</div>
 		<hr/>
 		<div id="bottom">
