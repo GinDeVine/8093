@@ -1,9 +1,74 @@
 <html>
 <head>
+<title>8093:</title>
 <script src="8093.js"></script>
+<style>
+*{margin:0;padding:0;border-radius:4px;}
+body{background-color:#fcfcfc;font-size:14px;font-family:helvetica,"Helvetica Neue",arial,sans-serif;line-height:1.5;background-image:url("orstafootert.png");background-repeat:no-repeat;background-position:bottom;padding-bottom:180px;}
+
+div#content {width:600px;margin:0 auto;}
+div#upper	{padding:20px 0 0 0;text-align:center;}
+div#middle	{padding:5px 0 10px 0;}
+div#bottom	{}
+
+h1#title	{font-size:50px;}
+h3#under	{font-size:30px;margin-top:-20px;}
+h3#notice	{font-size:20px;position:relative;right:20px;}
+h3#about	{font-size:25px;position:relative;right:20px;}
+
+p#about	{}
+p#intro	{font-weight:bold;}
+p		{padding:5px 0 5px 0;}
+
+.code	{font-family:monospace;white-space:pre-wrap;}
+.button	{cursor:pointer;text-decoration:none;color:#000;}
+.button:hover {text-decoration:underline;}
+.mail{direction: rtl; unicode-bidi: bidi-override;}
+.skinny{font-weight:100;color:#666;font-size:80%;}
+hr		{margin:20px 0;}
+textarea{width:450px;height:100px;padding:5px;border-color:#ccc;}
+
+img#x{width:100px;height:100px;margin: 0 20px;border-color:#ccc;}
+
+</style>
 </head>
 <body>
-<h1>8093</h1>
-<h2>Hiding stuff in images.</h2>
+	<div id="content">
+		<div id="upper">
+			<h1 id="title">8093</h1>
+			<h3 id="under">Hidden within pixels</h3>
+		</div>
+		<hr/>
+		<div id="middle">
+		<h3 id="">Okay, to hide some data! <a href="#about" class="button skinny"><sup>[?]</sup></a></h3>
+		<textarea placeholder="What is five times nine?"></textarea>
+		<img src="" id="x"></img>
+		<br/>
+		<b class="button">Commence the hiding sequence!</b>
+		</div>
+		<hr/>
+		<div id="bottom">
+			<h3 id="about" name="about">ABOUT</h3>
+			<p id="about">
+				<p id="intro">
+					Hiding data within the opacity of images, starting at pixel (x,y) with an interval of z(i) between every pixel. Unused pixel get a slight static noise of opacity. The opacity is barely - if at all - noticable by the bare eye, and even though you know it's there, you'll need both x, y and z to find it.
+				</p>
+				<p>
+					As I assume you are using Google Chrome, pop open your JavaScript console and type in the code mentioned below. Firefox users can do it with FireBug and people who doesn not realize their own good and use any other browser might need to type it into the URL bar with "javascript: " in front.
+				</p>
+				<p>
+					To hide a message, use the function <b class="code">hideData(DATA [, x, y, z])</b>. The data is, surprisingly, the data you want to hide, and the optional xyz is the coordinate to begin and interval, as mentioned above. X and y is numbers and z is a function of the pattern "function(i){return i*2}" (this example hides the data in every other pixel). If x, y or z is undefined, the default values will be used instead.
+				</p>
+				<p>
+					In order to read your hidden message, use the function <b class="code">readFromPNG(SOURCE [, x, y, z])</b>. The source being the source of the image and the xyz the same as was used to hide the data. If not source specified, it will use the image displayed, and if no image is displayed, it'll throw a nice little error.
+				</p>
+				<p>
+					Due to security reasons, it's not without problems to get images from external servers, and at the moment one is therefore limited to my lovely little image taken in Ørsta, Norway last autumn. I have only two methods to go around these security measures, one is pasting the PNG code at this site, and the other is to fetch the image through server side code. As the former being bothersome for the user and the latter being hard on my server and time-consuming, I have yet to decide what options are better. 
+				</p>
+			</p>
+			<h3 id="notice">GDV:2011</h3>
+			<h5 class="mail">moc[ tod ]liamg[ ta ]enivednig</h5>
+		</div>
+	</div>
 </body>
 </html>
