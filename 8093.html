@@ -29,10 +29,9 @@ window.onload = function(){
 
 function useImage(file){
 	var img = document.getElementById("targetImage");
-	img.file = file;
+	img.name = "thisisnohiddenmessage"
 	var reader = new FileReader();
 	reader.onload = function(ev) {
-		console.log(ev);
 		img.src = ev.target.result;
 	}
 	reader.onerror = function(ev){
@@ -67,10 +66,15 @@ p		{padding:5px 0 5px 0;}
 .mail{direction: rtl; unicode-bidi: bidi-override;}
 .skinny{font-weight:100;color:#666;font-size:80%;}
 hr		{margin:20px 0;}
+
 textarea{width:450px;height:100px;padding:5px;border-color:#ccc;}
+input[type=text]	{width:40px;padding:3px; margin-right:5px;border: 1px solid #ccc;}
+input[type=text]#x	{}
+input[type=text]#y	{}
+input[type=text]#z	{width:280px;}
 
 img#targetImage{width:100px;height:100px;margin: 0 20px;float:right;border: solid 1px #ccc;background-color:#FFF;}
-img#targetImage:hover{border: solid 3px #aeaefe;background-color:#fafaFf;position:relative;top:-2px;right:-2px;}
+img#targetImage:hover{border: solid 3px #c0c0fe;background-color:#f6f6Ff;position:relative;top:-2px;right:-2px;}
 
 </style>
 </head>
@@ -82,30 +86,32 @@ img#targetImage:hover{border: solid 3px #aeaefe;background-color:#fafaFf;positio
 		</div>
 		<hr/>
 		<div id="middle">
-		<h3 id="">Okay, to hide some data! <a href="#about" class="button skinny"><sup>[?]</sup></a></h3>
+		<h3 id="">Okay, let's go hiding some data! <a href="#about" class="button skinny"><sup>[?]</sup></a></h3>
 		<textarea id="data" placeholder="What is five times nine?"></textarea>
-		<img src="" id="targetImage" title="Drag the desired image here!"></img>
+		<img src="drag.png" id="targetImage" title="Drag the desired image here!"></img>
 		<br/>
+		<input type="text" placeholder="x" id="x"/><input type="text" placeholder="y" id="y" /><input type="text" placeholder="z" id="z" />
 		<b class="button" onclick="hide()">Hide</b>/<b class="button" onclick="seek()">Seek</b>
+		<h3 id="errorConsole"></h3>
 		</div>
 		<hr/>
 		<div id="bottom">
 			<h3 id="about" name="about">ABOUT</h3>
 			<p id="about">
 				<p id="intro">
-					Hiding data within the opacity of images, starting at pixel (x,y) with an interval of z(i) between every pixel. Unused pixel get a slight static noise of opacity. The opacity is barely - if at all - noticable by the bare eye, and even though you know it's there, you'll need both x, y and z to find it.
+					Hiding data within the opacity of images, starting at pixel (x,y) with an interval of z(i) between every pixel. Unused pixel get a slight static noise of opacity. The opacity is barely - if at all - noticable by the bare eye, and even though you know it's there, you'll need both x and y and especially z to find it.
 				</p>
 				<p>
-					As I assume you are using Google Chrome, pop open your JavaScript console and type in the code mentioned below. Firefox users can do it with FireBug and people who doesn not realize their own good and use any other browser might need to type it into the URL bar with "javascript: " in front.
+					This will only work with newer web-browsers, so it's reccomended you have Google Chrome, Mozilla Firefox or any other that has both canvas and file API support. Drag and drop the desired image (in PNG format) onto the square beside the text-field. If you want to hide your data in it, paste or write the data in the text-field and hit "Hide". If you want to extract the data from the image, simply press "Seek" and - with some luck - the data will appear in the text-field.
 				</p>
 				<p>
-					To hide a message, use the function <b class="code">hideData(DATA [, x, y, z])</b>. The data is, surprisingly, the data you want to hide, and the optional xyz is the coordinate to begin and interval, as mentioned above. X and y is numbers and z is a function of the pattern "function(i){return i*2}" (this example hides the data in every other pixel). If x, y or z is undefined, the default values will be used instead.
+					Both when hiding and seeking, you might want to set the x, y and z. The coordinate (x,y) is the starting position in the image where the data is stored, and z is a function which returns the interval between each pixel where data should be stored. An example of z could be <b class="code">function(i){return i*2}</b> which uses every other pixel. One can do quite a lot more with z, as long as z(i) returns an integer and never the same integer with i from 0 to twice the length of the data. An error will be displayed if there's not enough room in the image to store the data with the given xyz. If no x, y or z is given, their default values will be used. (a bit more advanced z could be <b class="code">function(i){return Math.floor(i*i+Math.sin(i)*i)}</b>)
 				</p>
 				<p>
-					In order to read your hidden message, use the function <b class="code">readFromPNG(SOURCE [, x, y, z])</b>. The source being the source of the image and the xyz the same as was used to hide the data. If not source specified, it will use the image displayed, and if no image is displayed, it'll throw a nice little error.
+					Due to security reasons, it's not without problems to get images from external servers, and at the moment one is therefore limited to local images dropped onto the page. There's only two other methods of passing this security measure, one is pasting the PNG data URL at this site, and the other is to fetch the image through server side code. As the former would be bothersome for the user and the latter being hard on the server as well as time-consuming, I have yet to implement either option. Therefore, for now, one has to download the desired image.
 				</p>
 				<p>
-					Due to security reasons, it's not without problems to get images from external servers, and at the moment one is therefore limited to my lovely little image taken in Ørsta, Norway last autumn. I have only two methods to go around these security measures, one is pasting the PNG code at this site, and the other is to fetch the image through server side code. As the former being bothersome for the user and the latter being hard on my server and time-consuming, I have yet to decide what options are better. 
+					Thank you for taking the time to look at my little app. Questions, suggestions, critique or comments in general is well appreciated, though you'd have to go through mail, as this page lacks a comment section.
 				</p>
 			</p>
 			<h3 id="notice">GDV:2011</h3>

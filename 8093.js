@@ -1,43 +1,7 @@
-/*
-function hideIt(canvas,data,x,y,z){
-	// Hides the data in canvas, starting at (x,y) with an interval of z between each pixels with stored data.
-	// All unused pixels have random info in them.
-	var w = canvas.width
-	  , h = canvas.height
-	  , ctx = canvas.getContext("2d")	// CanvasRenderingContext2D, where the image data is stored.
-	  , imd = ctx.getImageData(0,0,w,h) // The image data containing the CanvasPixelArray, which we'll manipulate.
-	  , cpa = imd.data					// The CanvasPixelArray, stores the rgba of every pixel in a 1D array.
-	  , len = cpa.length				// The length of the CanvasPixelArray
-	  , dln = data.length				// How many symbols does the data contain.
-	  , fpx = (y*w+x)*4;				// The position of the first pixel to start hiding data.
-
-	// enoughSpce check, surprisingly, if there's enough space to hide the message in the selected image with the selected x, y and z.
-	var enoughSpace = function(){
-		for(var i = 0,sum=0; i<2*dln; i+=2)sum+= z(i)+z(i+1);
-		return (0<len-(fpx+sum));
-	}
-	// If not enough space, throw error.
-	if(!enoughSpace)return Error("Selected image is not large enough to contain the data.");
+// I know the code here looks messy.. I haven't gotten around to clean it up yet....
+// I'll also finish adding comments at a later time, as of now they are few and not very helpful..
 
 
-	// Randomize the opacity in all the other pixels.
-	// As the char code is stored with it's base 16 representation over two pixels, 16 is the greatest opacity neccecary to make...
-	for(var j = 3; j < len; j+=4) cpa[j] = 255-Math.floor(Math.random()*16);
-
-	// Store the data within the CanvasPixelArray
-	for(var i = 0; i < 2*dln; i+=2){
-		var cc = data.charCodeAt(i/2);
-		cpa[fpx+z(i)*4+3] = 255-(cc%16);
-		cpa[fpx+z(i+1)*4+3] = 255-(cc>>4);
-	}
-	cpa[fpx+z(i+2)*4+3] = 255-3;
-	cpa[fpx+z(i+3)*4+3] = 255-0;
-
-	// Place the new image data into the canvas.
-	ctx.putImageData(imd,0,0);
-	return canvas.toDataURL("image/png");
-}
-*/
 function hideData(data,img,x,y,z){
 	// Hides the data in the selected image, starting at (x,y) with an interval of z between each pixels with stored data.
 	// All unused pixels have random info in them.
@@ -52,11 +16,11 @@ function hideData(data,img,x,y,z){
 	  , ctx = canvas.getContext("2d")
 	  , w = canvas.width = tempImg.width
 	  , h = canvas.height = tempImg.height;
-	ctx.drawImage(img,0,0);
+	ctx.drawImage(tempImg,0,0);
 
 	var def = getDefaultXYZ(canvas)
-	if(x===undefined)var x = def[0];
-	if(y===undefined)var y = def[1];
+	if(typeof x != "number")var x = def[0];
+	if(typeof y != "number")var y = def[1];
 	if(typeof z != "function")var z = def[2];
 
 	var imd = ctx.getImageData(0,0,w,h) // The image data containing the CanvasPixelArray, which we'll manipulate.
@@ -65,11 +29,10 @@ function hideData(data,img,x,y,z){
 	  , dln = data.length				// How many symbols does the data contain.
 
 	var fpx = (y*w+x)*4;				// The position of the first pixel to start hiding data.
-
-	// enoughSpce check, surprisingly, if there's enough space to hide the message in the selected image with the selected x, y and z.
+	
+	// enoughSpace checks, surprisingly, if there's enough space to hide the message in the selected image with the selected x, y and z.
 	var enoughSpace = function(){
-		//console.log(len,dln,fpx)
-		return (0<len-(fpx+z(dln)));
+		return (0<len*4-(fpx+z(2*dln)));
 	}
 	// If not enough space, throw error.
 	if(!enoughSpace())return Error("Selected image is not large enough to contain the data with the current XYZ.");
@@ -92,46 +55,7 @@ function hideData(data,img,x,y,z){
 	ctx.putImageData(imd,0,0);
 	return canvas.toDataURL("image/png");;
 }
-/*
-function hideDataFromSource(data,x,y,z){
-	var canvas = document.createElement("canvas")
-	  , ctx = canvas.getContext("2d")
-	  , img = new Image();
-	canvas.id = "nothinghiddenhere"
-	img.src = "orsta.png";
-	img.style.position	= "absolute";
-	img.style.top		= "-10001px";
-	img.style.left		= "-10001px";
-	img.onload = function(){
-		var def = getDefaultXYZ(canvas)
-		if(x===undefined)var x = def[0];
-		if(y===undefined)var y = def[1];
-		if(typeof z != "function")var z = def[2];
-		canvas.width = this.width;
-		canvas.height = this.height;
-		ctx.drawImage(this,0,0);
-		hideIt(canvas,data,x,y,z)
-		saveImage(canvas);
-	}
-}*/
-/*
-function hideData(data,img,x,y,z){
-	var canvas = document.createElement("canvas")
-	  , ctx = canvas.getContext("2d")
-	if(data === undefined) return Error("No data selected!");
-	if(img === undefined) var img = document.getElementById("targetImage");
-	var def = getDefaultXYZ(canvas)
-	if(x===undefined)var x = def[0];
-	if(y===undefined)var y = def[1];
-	if(typeof z != "function")var z = def[2];
-	var dummyImg = new Image();
-	dummyImg.src = img.src;
-	canvas.width = dummyImg.width;
-	canvas.height = dummyImg.height;
-	ctx.drawImage(dummyImg,0,0);
-	hideIt(data,img,x,y,z)
-	saveImage(canvas);
-}*/
+
 
 function hide(){
 	var data = document.getElementById("data").value;
@@ -139,12 +63,14 @@ function hide(){
 	var x = document.getElementById("x");
 	var y = document.getElementById("y");
 	var z = document.getElementById("z");
-	if((x===null) || (x.value == ""))x = undefined;
-	else x = x.value;
-	if((y===null) || (y.value == ""))y = undefined;
-	else y = y.value;
-	if((z===null) || (z.value == ""))z = undefined;
-	else z = z.value;
+	console.log(z.value)
+	if((x===null) || (x.value == ""))x = undefined;
+	else x = parseInt(x.value);
+	if((y===null) || (y.value == ""))y = undefined;
+	else y = parseInt(y.value);
+	if((z===null) || (z.value == ""))z = undefined;
+	else z = eval("("+z.value+")");
+	console.log(x,y,z)
 	img.src = hideData(data,img,x,y,z);
 }
 function seek(){
@@ -153,13 +79,13 @@ function seek(){
 	var x = document.getElementById("x");
 	var y = document.getElementById("y");
 	var z = document.getElementById("z");
-	if((x===null) || (x.value == ""))x = undefined;
-	else x = x.value;
-	if((y===null) || (y.value == ""))y = undefined;
-	else y = y.value;
-	if((z===null) || (z.value == ""))z = undefined;
-	else z = z.value;
-	output.innerHTML = readData(img,x,y,z);
+	if((x===null) || (x.value == ""))x = undefined;
+	else x = parseInt(x.value);
+	if((y===null) || (y.value == ""))y = undefined;
+	else y = parseInt(y.value);
+	if((z===null) || (z.value == ""))z = undefined;
+	else z = eval("("+z.value+")");
+	output.value = readData(img,x,y,z);
 }
 
 function readData(img,x,y,z){
@@ -203,34 +129,6 @@ function readData(img,x,y,z){
 
 	return data.substr(0,data.length-1);
 }
-
-/*
-function readFromPNG(src,x,y,z){
-	function readPNG(img){
-		var def = getDefaultXYZ(canvas)
-		if(x===undefined)var x = def[0];
-		if(y===undefined)var y = def[1];
-		if(typeof z != "function")var z = def[2];
-		canvas.width = img.width;
-		canvas.height = img.height;
-		ctx.drawImage(img,0,0);
-		console.log(readData(x,y,z,canvas));
-	}
-	var canvas = document.createElement("canvas")
-	  , ctx = canvas.getContext("2d")
-	  , img = document.getElementById("targetImage");
-	canvas.id = "nothinghiddenhere"
-	if((img === undefined) || img.src == "") return Error("No image selected!")
-	else return readPNG(img);
-}
-*/
-
-/*
-function saveImage(canvas){
-	var img = document.getElementById("targetImage")
-	img.src = canvas.toDataURL("image/png");
-}
-*/
 
 
 function getDefaultXYZ(canvas){
