@@ -3,28 +3,42 @@
 <title>8093:</title>
 <script src="8093.js"></script>
 <script>
-
+var rgba = {r:true,g:true,b:true,a:false};
+var cons;
 window.onload = function(){
+	cons = document.getElementById("console");
 	var img = document.getElementById("targetImage");
-	window.dragenter = function(ev) {
+
+	if(location.hash!="")document.getElementById("bottom").className = "";
+
+	addEventListener("dragenter", function(ev) {
   		ev.stopPropagation();
 		ev.preventDefault();
-	}
-	window.dragover = function(ev) {
+	}, false);
+
+	addEventListener("dragover", function(ev) {
 		ev.stopPropagation();
 		ev.preventDefault();
-	}
-	img.drop = function(ev) {
+	}, false);
+
+	addEventListener("drop", function(ev) {
 		ev.stopPropagation();
 		ev.preventDefault();
 		var files = ev.dataTransfer.files;
 		if(files.length>1)return alert("Just one file, thankyouverymuch!")
 		else if(files[0].type != "image/png") return alert("Use .png files, thankyouverymuch!")
 		else return useImage(files[0]);
+	}, false);
+
+	var valBtns = document.getElementById("colors");
+	for(i in valBtns.children){
+		var ele = valBtns.children[i];
+		ele.onclick = function(e){
+			this.className = (this.className=="active")?"":"active";
+			rgba[this.id] = (this.className=="active");
+		}
+		ele.className = rgba[ele.id]?"active":"";
 	}
-	img.addEventListener("dragenter", dragenter, false);
-	img.addEventListener("dragover", dragover, false);
-	img.addEventListener("drop", img.drop, false);
 }
 
 function useImage(file){
@@ -54,28 +68,45 @@ div#bottom	{}
 h1#title	{font-size:50px;}
 h3#under	{font-size:30px;margin-top:-20px;}
 h3#notice	{font-size:20px;position:relative;right:20px;}
+h3#help		{font-size:25px;position:relative;right:20px;}
 h3#about	{font-size:25px;position:relative;right:20px;}
+h3#console	{font-size:16px;margin: 5px 0 0 0;}
+h3#console.error{color:#cc7777}
+h3#console.note	{color:#77cc77}
 
 p#about	{}
+p#help	{}
 p#intro	{font-weight:bold;}
 p		{padding:5px 0 5px 0;}
 
 .code	{font-family:monospace;white-space:pre-wrap;}
 .button	{cursor:pointer;text-decoration:none;color:#000;}
-.button:hover {text-decoration:underline;}
-.mail{direction: rtl; unicode-bidi: bidi-override;}
-.skinny{font-weight:100;color:#666;font-size:80%;}
+.button:hover	{text-decoration:underline;}
+.mail	{direction: rtl; unicode-bidi: bidi-override;}
+.skinny	{font-weight:100;color:#666;font-size:80%;}
 hr		{margin:20px 0;}
+a		{text-decoration:none;color:#7777CC;}
+a:hover	{text-decoration:underline;color:#5555CC;}
 
-textarea{width:450px;height:100px;padding:5px;border-color:#ccc;}
+textarea	{width:450px;height:100px;padding:5px;border-color:#ccc;}
 input[type=text]	{width:40px;padding:3px; margin-right:5px;border: 1px solid #ccc;}
 input[type=text]#x	{}
 input[type=text]#y	{}
 input[type=text]#z	{width:280px;}
 
-img#targetImage{width:100px;height:100px;margin: 0 20px;float:right;border: solid 1px #ccc;background-color:#FFF;}
+img#targetImage{width:100px;height:100px;margin: 0 15px 0 0;float:right;border: solid 1px #ccc;background-color:#FFF;}
 img#targetImage:hover{border: solid 3px #c0c0fe;background-color:#f6f6Ff;position:relative;top:-2px;right:-2px;}
 
+div#r		{background-color:#C33}
+div#g		{background-color:#3C3}
+div#b		{background-color:#33C}
+div#a		{background-color:#CCC}
+div#colors	{display:inline-block;padding:0 0 10px 4px;float:rigth;}
+div#colors div	{width:15px;height:15px;margin: 2px 0;cursor:pointer;border:1px solid #000;opacity:0.4;}
+div#colors div:hover {border:1px solid #888;}
+div#colors div.active	{opacity:1;}
+
+.hidden{display:none;}
 </style>
 </head>
 <body>
@@ -86,26 +117,73 @@ img#targetImage:hover{border: solid 3px #c0c0fe;background-color:#f6f6Ff;positio
 		</div>
 		<hr/>
 		<div id="middle">
-		<h3 id="">Okay, let's go hiding some data! <a href="#about" class="button skinny"><sup>[?]</sup></a></h3>
+		<h3 id="">Let's hide some data! <a href="#help" class="button skinny" onclick="document.getElementById('bottom').className = '';"><sup>[help]</sup></a></h3>
 		<textarea id="data" placeholder="What is five times nine?"></textarea>
+		<div id="colors"><div id="r"></div><div id="g"></div><div id="b" class="active"></div><div id="a"></div></div>
 		<img src="drag.png" id="targetImage" title="Drag the desired image here!"></img>
 		<br/>
 		<input type="text" placeholder="x" id="x"/><input type="text" placeholder="y" id="y" /><input type="text" placeholder="z" id="z" />
 		<b class="button" onclick="hide()">Hide</b>/<b class="button" onclick="seek()">Seek</b>
-		<h3 id="errorConsole"></h3>
+		<h3 id="console"></h3>
 		</div>
-		<hr/>
-		<div id="bottom">
-			<h3 id="about" name="about">ABOUT</h3>
-			<p id="about">
+		<div id="bottom" class="hidden">
+			<hr/>
+			<p id="help">
+				<h3 id="help" name="help">INSTRUCTIONS</h3>
 				<p id="intro">
-					Hiding data within the opacity of images, starting at pixel (x,y) with an interval of z(i) between every pixel. Unused pixel get a slight static noise of opacity. The opacity is barely - if at all - noticable by the bare eye, and even though you know it's there, you'll need both x and y and especially z to find it.
+					This is an web-app for hiding messages and data within images. Here are some (hopefully) simple and understandable steps in order to use it properly. <i>(If you are not completely new to the internet, the first part could be overly simple and a bit painful to read as I've tried to write it for a general audience. My apologies for the inconvenience)</i>
 				</p>
 				<p>
-					This will only work with newer web-browsers, so it's reccomended you have Google Chrome, or any other that has the same canvas and file API support as Chrome. Drag and drop the desired image (in PNG format) onto the square beside the text-field. If you want to hide your data in it, paste or write the data in the text-field and hit "Hide". If you want to extract the data from the image, simply press "Seek" and - with some luck - the data will appear in the text-field.
+					This will only work with newer web-browsers, so it's recommended you have <a href="http://google.com/chrome">Google Chrome</a>, or any other browser that has the same Canvas and File API support as Chrome.
 				</p>
 				<p>
-					Both when hiding and seeking, you might want to set the x, y and z. The coordinate (x,y) is the starting position in the image where the data is stored, and z is a function which returns the interval between each pixel where data should be stored. An example of z could be <b class="code">function(i){return i*2}</b> which uses every other pixel. One can do quite a lot more with z, as long as z(i) returns an integer and never the same integer with i from 0 to twice the length of the data. An error will be displayed if there's not enough room in the image to store the data with the given xyz. If no x, y or z is given, their default values will be used. (a bit more advanced z could be <b class="code">function(i){return Math.floor(i*i+Math.sin(i)*i)}</b>)
+					First of all, you'll need a PNG-image (an image with .png at the end of the name). Drag the selected image onto this site, and you'll see it appear in the square on the right. 
+				</p>
+				<p>
+					In order to hide information in the image, all you need to do is write some text it the large text field (the one with "what is five times nine?" as placeholder text) and press "Hide".
+				</p>
+				<p>
+					The image on the right should now have your message inside it, and you can right-click on the image and click "Save Image As" in order to download the image. The new image could be sent to others, who in turn could read it by following the steps below on how to read the hidden information.
+				</p>
+				<p>
+					To read the hidden information from the loaded image, simply press "Seek" and the hidden message - given it was made by the default values - will appear in the large text field.
+				</p>
+				<p>
+					There are a few optional methods to prevent unwanted people from reading your hidden messages, each with a higher level of security and which can be combined at your wish. The simplest methods are the four colored squares between the text field and the image. These represent red(r), green(g), blue(b) and transparency(a for alpha). Any combination of one or more of these will decide how to hide the message in the image. Due to the few possible combinations, they do not prevent people from reading the messages much.
+				</p>
+				<p>
+					The second method is the two text fields with x and y as placeholder texts. These values determine the coordinate (x,y) in the image where the first part of the message is going to be hidden. Left blank or without numbers gives the default values of 24 and 12, respectively. This gives a lot more combinations, but still, it's relatively easy to try all combinations within a short period of time.
+				</p>
+				<p>
+					The last method requires some knowledge of either programming or math. It's written in the 'z' text field and takes a JavaScript function as input (ex: '<b class="code">function(i){return i*2}</b>') which returns the interval to the next pixel to store some of your message. Any working JavaScript code within the function can be used, with the requirements that the function z(i) should return an integer (it will be rounded) and not the same integer twice for i from 0 to about four times the size of your message (depending on the settings). The app will notify you if it thinks it returns the same value twice or if there won't be enough space in the image to hide with the current setting.
+				</p>
+				<p>
+					For the sake of easy sharing of these methods, it's implemeneted a shortcut for adding them. By writing the expression '<b class="code">[#hide-with:RGBA#X#Y#Z#]</b>' (Replace RGBA with the chosen R,G,B and A boxes, X with the X value, Y with the Y value and Z with the Z function) in the large text field, the app will set those values as your settings both when hiding and reading and will not be part of the message. Such an expression with the current settings should appear in green text below the text fields, which makes it easier to share your 'key' with others or store it on your computer.
+				</p>
+				<p>
+					Due to Canvas security issues, there is no support for images from external servers. There's only two methods (that I can think of) which'll make this possible, the first is copy-pasting the PNG data URL, and the other is to fetch the image through server side code. As the former would be both bothersome for the user, the latter would be hard on the server and both would be too time consuming, I have chosen to implement neither. Therefore, download, drag and drop is the way to go for now.
+				</p>
+				<p>
+					Thank you for taking the time to look at my little app. Questions, suggestions, critique, opinions and comments in general are well appreciated, though you'd have to go through mail, as this page lacks a comment section.
+				</p>
+
+			<p>
+			<!--
+			<hr/>
+			Hidden due to this being the early instructions and not just an about section. Need updating and refining...:;
+			<p id="about" style="visibility:hidden;">
+				<h3 id="about" name="about">VERBOSE ABOUT</h3>
+				<p id="intro">
+					Short summary: it's hiding data within PNG images, starting at pixel (x,y) with an interval of z(i) between every pixel used. Unused pixels get a random value, so no pixel is left unchanged. The changes are barely - if at all - noticable by the bare eye, and even though you know it's there, you'll need the chosen 'rgbaxyz' values to find it.
+				</p>
+				<p>
+					This will only work with newer web-browsers, so it's recommended you have Google Chrome, or any other browser that has the same canvas and file API support as Chrome. Drag and drop the desired image (in PNG format). If you want to hide your data in it, write the data in the text field and hit "Hide". If you want to extract the data from the image, simply press "Seek" after adding the image, and - with some luck - the data will appear in the text field.
+				</p>
+				<p>
+					When seeking, you need to set the x, y and z to the same values that were used while hiding. The coordinate (x,y) is the starting position in the image where the data is stored, and z is a function which returns the interval between each pixel where data should be stored. A simple example of z could be <b class="code">function(i){return i*2}</b> which uses every other pixel. One can do quite a lot more with z (as long as you know JS), as long as z(i) returns an integer and never the same integer with i from 0 to about four times the length of the data, (depending on your settings). An error will be displayed if there's not enough room in the image to store the data with the given xyz. If no x, y or z is given, their default values will be used. A little note on the z, as long as you can see it returns the desired result, there's nothing stopping you from using any z you'd like. (An example of a bit more advanced z could be <b class="code">function(i){return Math.floor(i*i+Math.sin(i)*i)}</b>)
+				</p>
+				<p>
+					The four colored squares between the text field and the image choose which values the data should be stored in (red, green, blue and transparency). Any combination work, but it's not reccomended to use the transparency without an transparent image, as this would be more easily noticable by a third party than in the color.
 				</p>
 				<p>
 					Due to security reasons, it's not without problems to get images from external servers, and at the moment one is therefore limited to local images dropped onto the page. There's only two other methods of passing this security measure, one is pasting the PNG data URL at this site, and the other is to fetch the image through server side code. As the former would be bothersome for the user and the latter being hard on the server as well as time-consuming, I have yet to implement either option. Therefore, for now, one has to download the desired image.
@@ -114,6 +192,7 @@ img#targetImage:hover{border: solid 3px #c0c0fe;background-color:#f6f6Ff;positio
 					Thank you for taking the time to look at my little app. Questions, suggestions, critique or comments in general is well appreciated, though you'd have to go through mail, as this page lacks a comment section.
 				</p>
 			</p>
+			-->
 			<h3 id="notice">GDV:2011</h3>
 			<h5 class="mail">moc[ tod ]liamg[ ta ]enivednig</h5>
 		</div>
