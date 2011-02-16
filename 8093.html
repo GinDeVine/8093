@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>8093:</title>
+<title>8093: Hidden within pixels</title>
 <script src="8093.js"></script>
 <script>
 var rgba = {r:true,g:true,b:true,a:false};
@@ -9,7 +9,7 @@ window.onload = function(){
 	cons = document.getElementById("console");
 	var img = document.getElementById("targetImage");
 
-	if(location.hash!="")document.getElementById("bottom").className = "";
+	//if(location.hash!="")document.getElementById("bottom").className = "";
 
 	addEventListener("dragenter", function(ev) {
   		ev.stopPropagation();
@@ -54,6 +54,11 @@ function useImage(file){
 	reader.readAsDataURL(file);
 }
 
+function help(th){
+	var bot = document.getElementById('bottom');
+	bot.className = (bot.className=="")?"hidden":"";
+	th.firstChild.innerHTML = (bot.className=="")?"[hide help]":"[help]";
+}
 
 </script>
 <style>
@@ -108,7 +113,20 @@ div#colors div.active	{opacity:1;}
 
 .hidden{display:none;}
 </style>
+<script type="text/javascript"> 
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-17728706-1']);
+  _gaq.push(['_trackPageview']);
+ 
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
 </head>
+
+
 <body>
 	<div id="content">
 		<div id="upper">
@@ -117,7 +135,7 @@ div#colors div.active	{opacity:1;}
 		</div>
 		<hr/>
 		<div id="middle">
-		<h3 id="">Let's hide some data! <a href="#help" class="button skinny" onclick="document.getElementById('bottom').className = '';"><sup>[help]</sup></a></h3>
+		<h3 id="">Let's hide some data! <a href="#help" class="button skinny" onclick="help(this)"><sup>[help]</sup></a></h3>
 		<textarea id="data" placeholder="What is five times nine?"></textarea>
 		<div id="colors"><div id="r"></div><div id="g"></div><div id="b" class="active"></div><div id="a"></div></div>
 		<img src="drag.png" id="targetImage" title="Drag the desired image here!"></img>
