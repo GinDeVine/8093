@@ -1,6 +1,7 @@
 // I know the code here looks messy.. I haven't gotten around to clean it up yet....
-// I'll also finish adding comments at a later time, as of now they are few and not very helpful and probably outdated as well..
+// I'll also finish adding comments at a later time, as of now they are few, not very helpful and very outdated as well..
 
+var alphalim = 255;
 
 function Error(msg,add){
 	// Red notes
@@ -47,10 +48,10 @@ function hideData(data,img,x,y,z,tempImg){
 
 	var fpx = (y*w+x)*4;
 
-	var values = "rgba";
+	var values = "rgb";
 	
 	var chn = 0;
-	for(var i in rgba)if(rgba[i])chn++;
+	for(var i in rgb)if(rgb[i])chn++;
 
 	function enoughSpace(){
 		return (0<len*chn-(fpx+z(4*dln)));
@@ -67,7 +68,7 @@ function hideData(data,img,x,y,z,tempImg){
 		return true;
 	}
 
-	if(!validFunction()) return Error("Function Z repeats integers, data may be corrupted.")
+	if(!validFunction()) return Error("Function Z repeats integers, data will be corrupted.")
 
 
 	function leastSignificant(num,data){
@@ -75,42 +76,44 @@ function hideData(data,img,x,y,z,tempImg){
 	}
 
 	function parseData(data){
-		var parsed = "";
+		var parsed = [];
 		for(var i in data){
 			var n = data[i].charCodeAt(0)&255
-			parsed += (n&192)>>6;
-			parsed +=  (n&48)>>4;
-			parsed +=  (n&12)>>2;
-			parsed +=   (n&3)^0;
+			parsed.push((n&192)>>6,(n&48)>>4,(n&12)>>2,n&3);
 		}
-		return parsed+"0003";
+		return parsed.concat([0,0,0,3]);
 	}
 
 
-	var ndata = parseData(data);
-	var nln = ndata.length;
-	var cch = 0;
+	var ndata = parseData(data)
+	  , nln = ndata.length
+	  , cch = 0;
 
-	// Randomize the opacity in all the other pixels.
-	// As the char code is stored with it's base 16 representation over two pixels, 16 is the greatest opacity neccecary to make...
-	var j = len;
-	var u;
+
+	var j = len
+	  , u;
+
+
 	do{
 		u = j-1;
-		if(!rgba[u&3])continue;
+		if(!rgb[values[u%4]])continue;
 		cpa[u] = leastSignificant(cpa[u], (Math.random()*4)^0);
-	} while (--j);
-	for(var i = 0; i < nln; i++){
+	} while(--j);
+
+	var deadpxls = 0;
+	for(var i = 0; i < len; i++){
 		var gap;
 		var Z = fpx+(z(i)^0)*4;
-		for(var l in rgba){
-			if(!rgba[l])continue;
+		if((Z<0) || (Z>len))return Error("Z function returned a value outside of image.");
+		if(cpa[Z+3]<alphalim)continue;
+		for(var l in rgb){
+			if(!rgb[l])continue;
 			gap = values.indexOf(l);
-			if(gap<0)continue;
 
-			var c = parseInt(ndata.substr(cch,1));
+
+			cpa[Z+gap] = leastSignificant(cpa[Z+gap], ndata[cch]);
+ console.log(cpa[Z+gap]&3,Z)
 			cch++;
-			cpa[Z+gap] = leastSignificant(cpa[Z+gap], c);
 			if(cch>=nln)break;
 		}
 		if(cch>=nln)break;
@@ -122,7 +125,7 @@ function hideData(data,img,x,y,z,tempImg){
 	delete canvas
 		 , ctx
 		 , w, h, cch, ndata, nln, cpa, imd, len, dln;
-	return canvas.toDataURL("image/png");
+	return dataURL
 }
 
 function getIO(){
@@ -139,13 +142,13 @@ function getIO(){
 		var hideWith = io.data.substr(pos0,pos1-pos0);
 		io.data = io.data.replace(hideWith,"");
 		hideWith = hideWith.replace("[#hidden-with:","").replace("#]","").split("#");
-		if(hideWith.length!=4)return Error("Corrupt hide-with expression. The pattern is like this [#hidden-with:rgb#x#y#function(i){return i;}#] and should be pasted once, anywhere in the text-field.")
-		for(var l in rgba){
-			var vali = "rgba";
+		if(hideWith.length!=4)return Error("Corrupt hidden-with expression. The pattern is like this [#hidden-with:rgb#x#y#function(i){return i;}#] and should be pasted once, anywhere in the text-field.")
+		for(var l in rgb){
+			var vali = "rgb";
 			var n = hideWith[0].indexOf(l);
-			if(n<0)rgba[l] = false;
-			else rgba[l] = true;
-			document.getElementById(l).className = (rgba[l])?"active":"";
+			if(n<0)rgb[l] = false;
+			else rgb[l] = true;
+			document.getElementById(l).className = (rgb[l])?"active":"";
 		}
 		io.ele.x.value = hideWith[1];
 		io.ele.y.value = hideWith[2];
@@ -179,7 +182,7 @@ function hide(){
 	io.ele.img.src = nsrc;
 	Note("Hiding complete!");
 	var vs = ""
-	for(var u in rgba)if(rgba[u])vs+=u;
+	for(var u in rgb)if(rgb[u])vs+=u;
 	Note("<h6>[#hidden-with:"+vs+"#"+io.x+"#"+io.y+"#"+io.z+"#]</h6>",1);
 	delete io,nsrc,vs;
 }
@@ -190,58 +193,61 @@ function seek(){
 	io.ele.data.value = readData(io.ele.img,io.x,io.y,io.z,io.temp);
 	Note("Reading complete!");
 	var vs = ""
-	for(var u in rgba)if(rgba[u])vs+=u;
+	for(var u in rgb)if(rgb[u])vs+=u;
 	Note("<h6>[#hidden-with:"+vs+"#"+io.x+"#"+io.y+"#"+io.z+"#]</h6>",1);
 	delete io,vs;
 }
 
-function readData(img,x,y,z,tempImg){
+function readData(img,x,y,z){
 	// Reads the data from canvas, starting at (x,y) with an interval of z between each pixels with stored data.
 	
 	if(img === undefined) var img = document.getElementById("targetImage");
 	if(img.src == "") return Error("No image selected");
 
+	var temp = new Image();
+	temp.src = img.src;
+
 	var canvas = document.createElement("canvas")
 	  , ctx = canvas.getContext("2d")
-	  , w = canvas.width = tempImg.width
-	  , h = canvas.height = tempImg.height;
-	ctx.drawImage(tempImg,0,0)
+	  , w = canvas.width = temp.width
+	  , h = canvas.height = temp.height;
+	ctx.drawImage(temp,0,0)
 
 
-	if(x > tempImg.width  || x < 0 ||
-	   y > tempImg.height || y < 0) return Error("The coordinate (x,y) is not within the image. Image size is "+tempImg.width+"/"+tempImg.height);
+	if(x > temp.width  || x < 0 ||
+	   y > temp.height || y < 0) return Error("The coordinate (x,y) is not within the image. Image size is "+temp.width+"/"+temp.height);
 
 	var imd = ctx.getImageData(0,0,w,h)
 	  , cpa = imd.data				
 	  , len = cpa.length				
 	  , fpx = (y*w+x)*4;		
 
-	var values = "rgba";
+	var values = "rgb";
 
-	// Extract the data from the CPA
-	var data = ""
+
+	var data = [];
 	var lx = (len-fpx-3)/4;
 	var seq = [0,6]
 
 	delete canvas
 		 , ctx
-		 , imd;
+		 , imd
+		 , temp;
 
-	var pixl = "";
 	for(var i = 0; z(i)<lx; i++){
 		var gap;
 		var Z = fpx+(z(i)^0)*4;
-		for(var l in rgba){
-			if(!rgba[l])continue;
+		if((Z<0) || (Z>len))return Error("Z function returned a value outside of image.");
+		if(cpa[Z+3]<alphalim)continue;
+		for(var l in rgb){
+			if(!rgb[l])continue;
 			gap = values.indexOf(l);
 			if(gap<0)continue;
-
-			var c = parseInt(cpa[Z+gap])&3;
-			seq[0] += c<<seq[1];
+ console.log(cpa[Z+gap]&3,Z)
+			seq[0] += (cpa[Z+gap]&3)<<seq[1];
 			if(!seq[1]){
-				if(seq[0]==3)return (delete cpa),(data+pixl);
-				else pixl += String.fromCharCode(seq[0]);
-				if(pixl.length>=data.length>>2)data += pixl, pixl = "";
+				if(seq[0]==3)return (delete cpa),data.join("");
+				else data.push(String.fromCharCode(seq[0]));
 				seq = [0,6]
 			} else seq[1] -= 2;
 		}
@@ -251,35 +257,8 @@ function readData(img,x,y,z,tempImg){
 
 
 function getDefaultXYZ(size){
-	var x = size.shift()/2;
-	var y = size/2;
+	var x = (size.shift()/2)^0;
+	var y = (size/2)^0;
 	var z = eval("(function(i){return (i%2)?i:-i;})");
 	return [x,y,z];
-}
-
-function decodeKey(key,xm,ym){
-	if(xm===undefined)var xm = 100;
-	if(ym===undefined)var ym = 100;
-	var b16t = "0123456789ABCDEF";
-	var lok = key.length
-	function dtb(l){
-		var n = l.charCodeAt(0);
-		return b16t[n>>4]+b16t[n&15];
-	}
-	var b16key = "";
-	for(var u in key)b16key += dtb(key[u]);
-	nums = [0,0];
-	for(var x = 0; x<lok; x+=2 ){
-		var u = b16t.indexOf(b16key[x])-0;
-		var v = b16t.indexOf(b16key[x+1])-0;
-		nums[0] += u*lok;
-		nums[1] += (lok*v)<<(v*u);
-	}
-	var c = nums[0];
-	var d = nums[1];
-
-	function sumdig(n){ for(i=0,a=(n+""),r=0;i<a.length;i++)r+=(a[i]-0);return a;}
-	var x = Math.abs(sumdig(d-c)%xm);
-	var y = Math.abs(sumdig((d/c)^0)%ym);
-	return [x,y]
 }

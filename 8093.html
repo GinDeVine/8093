@@ -3,7 +3,7 @@
 <title>8093: Hidden within pixels</title>
 <script src="8093.js"></script>
 <script>
-var rgba = {r:true,g:true,b:true,a:false};
+var rgb = {r:true,g:true,b:true};
 var cons;
 window.onload = function(){
 	cons = document.getElementById("console");
@@ -35,9 +35,9 @@ window.onload = function(){
 		var ele = valBtns.children[i];
 		ele.onclick = function(e){
 			this.className = (this.className=="active")?"":"active";
-			rgba[this.id] = (this.className=="active");
+			rgb[this.id] = (this.className=="active");
 		}
-		ele.className = rgba[ele.id]?"active":"";
+		ele.className = rgb[ele.id]?"active":"";
 	}
 }
 
@@ -106,7 +106,7 @@ div#r		{background-color:#C33}
 div#g		{background-color:#3C3}
 div#b		{background-color:#33C}
 div#a		{background-color:#CCC}
-div#colors	{display:inline-block;padding:0 0 10px 4px;float:rigth;}
+div#colors	{display:inline-block;padding:0 0 20px 4px;float:rigth;}
 div#colors div	{width:15px;height:15px;margin: 2px 0;cursor:pointer;border:1px solid #000;opacity:0.4;}
 div#colors div:hover {border:1px solid #888;}
 div#colors div.active	{opacity:1;}
@@ -137,7 +137,7 @@ div#colors div.active	{opacity:1;}
 		<div id="middle">
 		<h3 id="">Let's hide some data! <a href="#help" class="button skinny" onclick="help(this)"><sup>[help]</sup></a></h3>
 		<textarea id="data" placeholder="What is five times nine?"></textarea>
-		<div id="colors"><div id="r"></div><div id="g"></div><div id="b" class="active"></div><div id="a"></div></div>
+		<div id="colors"><div id="r"></div><div id="g"></div><div id="b" class="active"></div><!--It didn't handle transparency well :(<div id="a"></div>--></div>
 		<img src="drag.png" id="targetImage" title="Drag the desired image here!"></img>
 		<br/>
 		<input type="text" placeholder="x" id="x"/><input type="text" placeholder="y" id="y" /><input type="text" placeholder="z" id="z" />
@@ -164,7 +164,7 @@ div#colors div.active	{opacity:1;}
 					The image on the right should now have your message inside it, and you can right-click on the image and click 'Save Image As' in order to download the image. The new image could be sent to others, who in turn could read it by following the steps below on how to read the hidden information.
 				</p>
 				<p>
-					To read the hidden information from the loaded image, simply press "Seek" and the hidden message - given it was made with the default values - will appear in the large text field. If you've got a text string in the pattern [#hidden-with:RGBA#X#Y#Z#], simply add it to the large text field, and its values will be used. More on the pattern below.
+					To read the hidden information from the loaded image, simply press "Seek" and the hidden message - given it was made with the default values - will appear in the large text field. If you've got a text string in the pattern [#hidden-with:rgb#X#Y#Z#], simply add it to the large text field, and its values will be used. More on the pattern below.
 				</p>
 				<p>
 					There are a few optional methods to prevent unwanted people from reading your hidden messages, each with a higher level of security and which can be combined at your wish. The simplest method is the four colored squares between the text field and the image. These represent the red(R), green(G), blue(B) and transparency(A for alpha) values of each pixel. Any combination of one or more of these will decide in which values to hide the message. Due to the few possible combinations, they are not good at preventing people from reading the messages.
@@ -173,10 +173,10 @@ div#colors div.active	{opacity:1;}
 					The second method is the two smaller text fields with 'x' and 'y' as placeholder texts. These values determine the coordinate (x,y) in the image where the first part of the message is going to be hidden. Left blank or without numbers gives the default values of half the width and height of the image. This gives a lot more combinations, but still, it's relatively easy to try all combinations within a short period of time.
 				</p>
 				<p>
-					The last method requires some knowledge of either programming or math. It's written in the 'z' text field and takes a JavaScript function as input (ex: '<b class="code">function(i){return i*2}</b>' or '<b>function (i){return (i%2)?i:-i;}</b>') which returns the pixel position relative to (x,y) to store i'th part of you message (the (x,y) position is represented in a 1d array). Any working JavaScript code within the function can be used, with the requirements that the function z(i) should return an integer (it will be floored) and not the same integer twice for i from 0 to about four times the size of your message (depending on the RGBA settings). The app will notify you if it thinks it returns the same value twice or if there won't be enough space in the image to hide with the current setting.
+					The last method requires some knowledge of either programming or math. It's written in the 'z' text field and takes a JavaScript function as input (ex: '<b class="code">function(i){return i*2}</b>' or '<b>function (i){return (i%2)?i:-i;}</b>') which returns the pixel position relative to (x,y) to store i'th part of you message (the (x,y) position is represented in a 1d array). Any working JavaScript code within the function can be used, with the requirements that the function z(i) should return an integer (it will be floored) and not the same integer twice for i from 0 to about four times the size of your message (depending on the rgb settings). The app will notify you if it thinks it returns the same value twice or if there won't be enough space in the image to hide with the current setting.
 				</p>
 				<p>
-					For the sake of easy sharing of these methods, it's implemeneted a shortcut for adding them. By writing the expression '<b class="code">[#hidden-with:RGBA#X#Y#Z#]</b>' (Replace RGBA with the chosen R,G,B and A boxes, X with the X value, Y with the Y value and Z with the Z function) in the large text field, the app will set those values as your settings both when hiding and reading and will not be part of the message. Such an expression with the current settings should appear in green text below the text fields, which makes it easier to share your 'key' with others or store it on your computer.
+					For the sake of easy sharing of these methods, it's implemeneted a shortcut for adding them. By writing the expression '<b class="code">[#hidden-with:rgb#X#Y#Z#]</b>' (Replace rgb with the chosen R,G,B and A boxes, X with the X value, Y with the Y value and Z with the Z function) in the large text field, the app will set those values as your settings both when hiding and reading and will not be part of the message. Such an expression with the current settings should appear in green text below the text fields, which makes it easier to share your 'key' with others or store it on your computer.
 				</p>
 				<p>
 					Due to Canvas security issues, there is no support for images from external servers. There's only two methods (that I can think of) which'll make this possible, the first is copy-pasting the PNG data URL, and the other is to fetch the image through server side code. As the former would be both bothersome for the user, the latter would be hard on the server and both would be too time consuming, I have chosen to implement neither. Therefore, download, drag and drop is the way to go for now.
