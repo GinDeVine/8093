@@ -21,7 +21,7 @@ function Note(msg,add){
 function ClearNote(){cons.innerHTML = "";}
 
 function hideData(data,img,x,y,z){
-	// Hides the data in the selected image, starting at (x,y) with an interval of z between each pixels with stored data.
+	// Hides the data in the selected image, starting at (x,y) with a z(i) giving a relative position in difference to (x,y) for where to hide the next part of the data..
 	// All unused pixels have random info in them.
 
 	if((data === undefined) || data == "") return Error("No data selected!");
@@ -36,33 +36,33 @@ function hideData(data,img,x,y,z){
 	  , h = canvas.height = tempImg.height;
 	ctx.drawImage(tempImg,0,0);
 
+	if(x > tempImg.width  || x < 0 ||
+	   y > tempImg.height || y < 0) return Error("The coordinate (x,y) is not within the image. Image size is "+tempImg.width+"/"+tempImg.height);
 
-	//try{
-		var imd = ctx.getImageData(0,0,w,h)
-	//} catch(err){return Error("No image selected.")+CatchError(err,1)}
-	var cpa = imd.data					// The CanvasPixelArray, stores the rgba of every pixel in a 1D array.
-	  , len = cpa.length				// The length of the CanvasPixelArray
-	  , dln = data.length				// How many symbols does the data contain.
+	delete tempImg;
 
-	var fpx = (y*w+x)*4;				// The position of the first pixel to start hiding data.
-	
+	var imd = ctx.getImageData(0,0,w,h);
+
+	var cpa = imd.data
+	  , len = cpa.length
+	  , dln = data.length
+
+	var fpx = (y*w+x)*4;
 
 	var values = "rgba";
 	
 	var chn = 0;
 	for(var i in rgba)if(rgba[i])chn++;
 
-	// enoughSpace checks, surprisingly, if there's enough space to hide the message in the selected image with the selected x, y and z.
 	function enoughSpace(){
 		return (0<len*chn-(fpx+z(4*dln)));
 	}
-	// If not enough space, throw error.
 	if(!enoughSpace())return Error("Image not large enough to contain the data with the current settings.");
 
 	function validFunction(){
 		var found = {};
 		for(var i = 0; i < dln*4/chn;i++){
-			var n = Math.round(z(i));
+			var n = z(i)^0;
 			if(found[n])return false;
 			else found[n] = true;
 		}
@@ -79,11 +79,11 @@ function hideData(data,img,x,y,z){
 	function parseData(data){
 		var parsed = "";
 		for(var i in data){
-			var n = data[i].charCodeAt(0)%256
+			var n = data[i].charCodeAt(0)&255
 			parsed += (n&192)>>6;
 			parsed +=  (n&48)>>4;
 			parsed +=  (n&12)>>2;
-			parsed +=   (n&3)>>0;
+			parsed +=   (n&3)^0;
 		}
 		return parsed+"0003";
 	}
@@ -95,13 +95,16 @@ function hideData(data,img,x,y,z){
 
 	// Randomize the opacity in all the other pixels.
 	// As the char code is stored with it's base 16 representation over two pixels, 16 is the greatest opacity neccecary to make...
-	for(var j = 0; j < len; j++){
-		if(!rgba[j%4])continue;
-		cpa[j] = leastSignificant(cpa[j], Math.floor(Math.random()*4));
-	}
+	var j = len;
+	var u;
+	do{
+		u = j-1;
+		if(!rgba[u&3])continue;
+		cpa[u] = leastSignificant(cpa[u], (Math.random()*4)^0);
+	} while (--j);
 	for(var i = 0; i < nln; i++){
 		var gap;
-		var Z = fpx+Math.round(z(i))*4;
+		var Z = fpx+(z(i)^0)*4;
 		for(var l in rgba){
 			if(!rgba[l])continue;
 			gap = values.indexOf(l);
@@ -117,6 +120,10 @@ function hideData(data,img,x,y,z){
 
 	// Place the new image data into the canvas.
 	ctx.putImageData(imd,0,0);
+	var dataURL = canvas.toDataURL("image/png");
+	delete canvas
+		 , ctx
+		 , w, h, cch, ndata, nln, cpa, imd, len, dln;
 	return canvas.toDataURL("image/png");
 }
 
@@ -128,13 +135,13 @@ function getIO(){
 	io.ele.y	= document.getElementById("y");
 	io.ele.z	= document.getElementById("z");
 	io.data = io.ele.data.value;
-	var pos0 = io.data.search(/\[\#hide-with:.*\#\]/);
+	var pos0 = io.data.search(/\[\#hidden-with:.*\#\]/);
 	if(pos0>=0){
 		var pos1 = io.data.search(/\#\]/)+2;
 		var hideWith = io.data.substr(pos0,pos1-pos0);
 		io.data = io.data.replace(hideWith,"");
-		hideWith = hideWith.replace("[#hide-with:","").replace("#]","").split("#");
-		if(hideWith.length!=4)return Error("Corrupt hide-with expression. The pattern is like this [#hide-with:rgb#x#y#function(i){return i;}#] and should be pasted once, anywhere in the text-field.")
+		hideWith = hideWith.replace("[#hidden-with:","").replace("#]","").split("#");
+		if(hideWith.length!=4)return Error("Corrupt hide-with expression. The pattern is like this [#hidden-with:rgb#x#y#function(i){return i;}#] and should be pasted once, anywhere in the text-field.")
 		for(var l in rgba){
 			var vali = "rgba";
 			var n = hideWith[0].indexOf(l);
@@ -173,7 +180,8 @@ function hide(){
 	Note("Hiding complete!");
 	var vs = ""
 	for(var u in rgba)if(rgba[u])vs+=u;
-	Note("<h6>[#hide-with:"+vs+"#"+io.x+"#"+io.y+"#"+io.z+"#]</h6>",1);
+	Note("<h6>[#hidden-with:"+vs+"#"+io.x+"#"+io.y+"#"+io.z+"#]</h6>",1);
+	delete io,nsrc,vs;
 }
 function seek(){
 	ClearNote();
@@ -183,7 +191,8 @@ function seek(){
 	Note("Reading complete!");
 	var vs = ""
 	for(var u in rgba)if(rgba[u])vs+=u;
-	Note("<h6>[#hide-with:"+vs+"#"+io.x+"#"+io.y+"#"+io.z+"#]</h6>",1);
+	Note("<h6>[#hidden-with:"+vs+"#"+io.x+"#"+io.y+"#"+io.z+"#]</h6>",1);
+	delete io,vs;
 }
 
 function readData(img,x,y,z){
@@ -201,11 +210,13 @@ function readData(img,x,y,z){
 	ctx.drawImage(tempImg,0,0)
 
 
+	if(x > tempImg.width  || x < 0 ||
+	   y > tempImg.height || y < 0) return Error("The coordinate (x,y) is not within the image. Image size is "+tempImg.width+"/"+tempImg.height);
 
-	var imd = ctx.getImageData(0,0,w,h) // The image data containing the CanvasPixelArray, which we'll manipulate.
-	  , cpa = imd.data					// The CanvasPixelArray, stores the rgba of every pixel in a 1D array.
-	  , len = cpa.length				// The length of the CanvasPixelArray
-	  , fpx = (y*w+x)*4;				// The position of the first pixel to start hiding data
+	var imd = ctx.getImageData(0,0,w,h)
+	  , cpa = imd.data				
+	  , len = cpa.length				
+	  , fpx = (y*w+x)*4;		
 
 	var values = "rgba";
 
@@ -213,9 +224,15 @@ function readData(img,x,y,z){
 	var data = ""
 	var lx = (len-fpx-3)/4;
 	var seq = [0,6]
+
+	delete canvas
+		 , ctx
+		 , imd;
+
+	var pixl = "";
 	for(var i = 0; z(i)<lx; i++){
 		var gap;
-		var Z = fpx+Math.round(z(i))*4;
+		var Z = fpx+(z(i)^0)*4;
 		for(var l in rgba){
 			if(!rgba[l])continue;
 			gap = values.indexOf(l);
@@ -224,13 +241,14 @@ function readData(img,x,y,z){
 			var c = parseInt(cpa[Z+gap])&3;
 			seq[0] += c<<seq[1];
 			if(!seq[1]){
-				if(seq[0]==3)return data;
-				else data += String.fromCharCode(seq[0]);
+				if(seq[0]==3)return (delete cpa),(data+pixl);
+				else pixl += String.fromCharCode(seq[0]);
+				if(pixl.length>=data.length>>2)data += pixl, pixl = "";
 				seq = [0,6]
 			} else seq[1] -= 2;
 		}
 	}
-	return data;
+	return (delete cpa),data;
 }
 
 
@@ -248,7 +266,7 @@ function decodeKey(key,xm,ym){
 	var lok = key.length
 	function dtb(l){
 		var n = l.charCodeAt(0);
-		return b16t[n>>4]+b16t[n%16];
+		return b16t[n>>4]+b16t[n&15];
 	}
 	var b16key = "";
 	for(var u in key)b16key += dtb(key[u]);
@@ -264,6 +282,6 @@ function decodeKey(key,xm,ym){
 
 	function sumdig(n){ for(i=0,a=(n+""),r=0;i<a.length;i++)r+=(a[i]-0);return a;}
 	var x = Math.abs(sumdig(d-c)%xm);
-	var y = Math.abs(sumdig(Math.floor(d/c))%ym);
+	var y = Math.abs(sumdig((d/c)^0)%ym);
 	return [x,y]
 }
