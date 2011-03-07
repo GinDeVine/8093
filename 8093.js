@@ -112,7 +112,6 @@ function hideData(data,img,x,y,z,tempImg){
 
 
 			cpa[Z+gap] = leastSignificant(cpa[Z+gap], ndata[cch]);
- console.log(cpa[Z+gap]&3,Z)
 			cch++;
 			if(cch>=nln)break;
 		}
@@ -243,7 +242,6 @@ function readData(img,x,y,z){
 			if(!rgb[l])continue;
 			gap = values.indexOf(l);
 			if(gap<0)continue;
- console.log(cpa[Z+gap]&3,Z)
 			seq[0] += (cpa[Z+gap]&3)<<seq[1];
 			if(!seq[1]){
 				if(seq[0]==3)return (delete cpa),data.join("");
