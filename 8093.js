@@ -20,7 +20,7 @@ function Note(msg,add){
 }
 function ClearNote(){cons.innerHTML = "";}
 
-function hideData(data,img,x,y,z){
+function hideData(data,img,x,y,z,tempImg){
 	// Hides the data in the selected image, starting at (x,y) with a z(i) giving a relative position in difference to (x,y) for where to hide the next part of the data..
 	// All unused pixels have random info in them.
 
@@ -28,8 +28,6 @@ function hideData(data,img,x,y,z){
 	if(img === undefined) var img = document.getElementById("targetImage");
 	if((img.src == "") || img.src.search(/http\:\/\/.*drag\.png/)>=0) return Error("No image selected.");
 
-	var tempImg = new Image();
-	tempImg.src = img.src;
 	var canvas = document.createElement("canvas")
 	  , ctx = canvas.getContext("2d")
 	  , w = canvas.width = tempImg.width
@@ -159,10 +157,12 @@ function getIO(){
 	else io.y = parseInt(io.ele.y.value);
 	if((io.ele.z===null) || (io.ele.z.value == ""))io.z = undefined;
 	else{
-		try{io.z = eval("("+io.ele.z.value+")");
-		}catch(err){return Error("Invalid Z function.")+CatchError(err,1)}
+		try { io.z = eval("("+io.ele.z.value+")");
+		} catch(err) { try{io.ele.z.value = io.z = eval("("+atob(io.ele.z.value)+")"); }catch(err){ return Error("Invalid Z function.")+CatchError(err,1) }};
 	}
-	var def = getDefaultXYZ()
+	io.temp = new Image();
+	io.temp.src = io.ele.img.src;
+	var def = getDefaultXYZ([io.temp.width,io.temp.height])
 	if(typeof io.x != "number")io.x = def[0];
 	if(typeof io.y != "number")io.y = def[1];
 	if(typeof io.z != "function")io.z = def[2]; 
@@ -174,7 +174,7 @@ function hide(){
 	ClearNote();
 	var io = getIO();
 	if(!io)return;
-	var nsrc = hideData(io.data,io.ele.img,io.x,io.y,io.z);
+	var nsrc = hideData(io.data,io.ele.img,io.x,io.y,io.z,io.temp);
 	if(typeof nsrc != "string")return -1;
 	io.ele.img.src = nsrc;
 	Note("Hiding complete!");
@@ -187,7 +187,7 @@ function seek(){
 	ClearNote();
 	var io = getIO();
 	if(!io)return;
-	io.ele.data.value = readData(io.ele.img,io.x,io.y,io.z);
+	io.ele.data.value = readData(io.ele.img,io.x,io.y,io.z,io.temp);
 	Note("Reading complete!");
 	var vs = ""
 	for(var u in rgba)if(rgba[u])vs+=u;
@@ -195,14 +195,12 @@ function seek(){
 	delete io,vs;
 }
 
-function readData(img,x,y,z){
+function readData(img,x,y,z,tempImg){
 	// Reads the data from canvas, starting at (x,y) with an interval of z between each pixels with stored data.
 	
 	if(img === undefined) var img = document.getElementById("targetImage");
 	if(img.src == "") return Error("No image selected");
 
-	var tempImg = new Image();
-	tempImg.src = img.src;
 	var canvas = document.createElement("canvas")
 	  , ctx = canvas.getContext("2d")
 	  , w = canvas.width = tempImg.width
@@ -252,10 +250,10 @@ function readData(img,x,y,z){
 }
 
 
-function getDefaultXYZ(canvas){
-	var x = decodeKey("default",100)[0];
-	var y = decodeKey("default",100)[1];
-	var z = eval("(function(i){return i*"+decodeKey("default",10)[0]+";})")
+function getDefaultXYZ(size){
+	var x = size.shift()/2;
+	var y = size/2;
+	var z = eval("(function(i){return (i%2)?i:-i;})");
 	return [x,y,z];
 }
 
