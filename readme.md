@@ -1,4 +1,4 @@
-8093 is a small steganography/cryptography JavaScript program that hides data within images.
+### 8093 is a small steganography/cryptography JavaScript program that hides data within images.
 
 [demo](http://svrv.net/e/xperiments/8093/8093.html)
 
