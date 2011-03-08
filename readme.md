@@ -1,5 +1,5 @@
 # 8093
-### A small stagography program in JavaScript
+### A small steganography program in JavaScript
 
 8093 is a small steganography program in JavaScript that hides data within PNG-images.
 
@@ -28,4 +28,4 @@ The default value for 'z' is 'function (i){return (i%2)?i:-i;}'.
 For easy sharing of these settings, there will appear a string in green text under the text fields in the pattern of [#hidden-with:RGB#X#Y#Z#]. If this string is added to the large text field when clicking 'hide' or 'seek', the settings in the string will be used. 
 
 
-I hope this was understandable, and thank you for taking the time to look at my little app.
+#### I hope this was understandable, and thank you for taking the time to look at my little app.
