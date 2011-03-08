@@ -1,8 +1,14 @@
-### 8093 is a small steganography JavaScript program that hides data within images.
+### 8093 - A small stagography program in JavaScript
+
+8093 is a small steganography program in JavaScript that hides data within PNG-images.
+
+
 
 [demo](http://svrv.net/e/xperiments/8093/8093.html)
 
----
+
+
+----
 
 #### Badly written "how to use"
 Drag and drop a PNG-image onto the page and enter the data you want to hide in the large text area.
