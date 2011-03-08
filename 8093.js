@@ -35,8 +35,8 @@ function hideData(data,img,x,y,z,tempImg){
 	  , h = canvas.height = tempImg.height;
 	ctx.drawImage(tempImg,0,0);
 
-	if(x > tempImg.width  || x < 0 ||
-	   y > tempImg.height || y < 0) return Error("The coordinate (x,y) is not within the image. Image size is "+tempImg.width+"/"+tempImg.height);
+	if(x > tempImg.width  || x < 0 ||
+	   y > tempImg.height || y < 0) return Error("The coordinate (x,y) is not within the image. Image size is "+tempImg.width+"/"+tempImg.height);
 
 	delete tempImg;
 
@@ -104,7 +104,7 @@ function hideData(data,img,x,y,z,tempImg){
 	for(var i = 0; i < len; i++){
 		var gap;
 		var Z = fpx+(z(i)^0)*4;
-		if((Z<0) || (Z>len))return Error("Z function returned a value outside of image.");
+		if((Z<0) || (Z>len))return Error("Z function returned a value outside of image.");
 		if(cpa[Z+3]<alphalim)continue;
 		for(var l in rgb){
 			if(!rgb[l])continue;
@@ -213,8 +213,8 @@ function readData(img,x,y,z){
 	ctx.drawImage(temp,0,0)
 
 
-	if(x > temp.width  || x < 0 ||
-	   y > temp.height || y < 0) return Error("The coordinate (x,y) is not within the image. Image size is "+temp.width+"/"+temp.height);
+	if(x > temp.width  || x < 0 ||
+	   y > temp.height || y < 0) return Error("The coordinate (x,y) is not within the image. Image size is "+temp.width+"/"+temp.height);
 
 	var imd = ctx.getImageData(0,0,w,h)
 	  , cpa = imd.data				
@@ -236,7 +236,7 @@ function readData(img,x,y,z){
 	for(var i = 0; z(i)<lx; i++){
 		var gap;
 		var Z = fpx+(z(i)^0)*4;
-		if((Z<0) || (Z>len))return Error("Z function returned a value outside of image.");
+		if((Z<0) || (Z>len))return Error("Z function returned a value outside of image.");
 		if(cpa[Z+3]<alphalim)continue;
 		for(var l in rgb){
 			if(!rgb[l])continue;
